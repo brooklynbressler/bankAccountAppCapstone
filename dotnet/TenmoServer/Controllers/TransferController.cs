@@ -34,5 +34,19 @@ namespace TenmoServer.Controllers
             }
         }
 
+        [HttpGet("{username}")]
+        public ActionResult<User> GetUser(string username)
+        {
+            User user = _userDAO.GetUser(username);
+
+            if(user != null)
+            {
+                return Ok(user);
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
     }
 }

@@ -99,6 +99,15 @@ namespace TenmoClient
                     {
                         Console.WriteLine($"Username is: {user.Username} UserId is: {user.UserId}");
                     }
+
+                    Console.WriteLine();
+                    Console.Write("Enter ID of user you are sending to (0 to cancel): ");
+                    int userInput = Convert.ToInt32(Console.ReadLine());
+                    Console.WriteLine();
+
+                    User transferUser = authService.GetUser(userInput);
+
+                    Console.WriteLine($"You'll be sending money to {transferUser.Username}");
                 }
                 else if (menuSelection == 3)
                 {
