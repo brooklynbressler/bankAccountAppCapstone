@@ -87,7 +87,9 @@ namespace TenmoClient
                 }
                 else if (menuSelection == 1)
                 {
-
+                    decimal balance = authService.GetAccountBalance();
+                    Console.WriteLine();
+                    Console.WriteLine($"Your current balance is: ${balance}");
                 }
                 else if (menuSelection == 2)
                 {
