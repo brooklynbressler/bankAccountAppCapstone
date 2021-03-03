@@ -93,7 +93,12 @@ namespace TenmoClient
                 }
                 else if (menuSelection == 2)
                 {
+                    List<User> users = authService.GetAllUsers();
 
+                    foreach (User user in users)
+                    {
+                        Console.WriteLine($"Username is: {user.Username} UserId is: {user.UserId}");
+                    }
                 }
                 else if (menuSelection == 3)
                 {

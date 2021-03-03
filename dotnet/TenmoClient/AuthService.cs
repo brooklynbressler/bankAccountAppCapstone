@@ -1,6 +1,7 @@
 ﻿using RestSharp;
 using RestSharp.Authenticators;
 using System;
+using System.Collections.Generic;
 using TenmoClient.Data;
 
 namespace TenmoClient
@@ -9,8 +10,27 @@ namespace TenmoClient
     {
         private readonly static string API_BASE_URL = "https://localhost:44315/";
         private readonly static string ACCOUNTS_URL = API_BASE_URL + "accounts";
+        private readonly static string TRANSFER_URL = API_BASE_URL + "transfer";
         private readonly IRestClient client = new RestClient();
 
+        public List<User> GetAllUsers()
+        {
+            RestRequest request = new RestRequest(TRANSFER_URL);
+            IRestResponse<List<User>> response = client.Get<List<User>>(request);
+
+            if(response.ResponseStatus != ResponseStatus.Completed)
+            {
+                throw new Exception("Error - Unable to reach server", response.ErrorException);
+            }
+            else if (!response.IsSuccessful)
+            {
+                throw new Exception("Error - Received unsuccessful response", response.ErrorException);
+            }
+            else
+            {
+                return response.Data;
+            }
+        }
 
         public decimal GetAccountBalance()
         {
