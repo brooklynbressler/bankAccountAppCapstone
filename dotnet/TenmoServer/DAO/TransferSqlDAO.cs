@@ -7,7 +7,7 @@ using TenmoServer.Models;
 
 namespace TenmoServer.DAO
 {
-    public class TransferSqlDAO
+    public class TransferSqlDAO : ITransferDAO
     {
         private readonly string connectionString;
 
@@ -16,9 +16,9 @@ namespace TenmoServer.DAO
             connectionString = dbConnectionString;
         }
 
-        public User GetUser(int userId)
+        public bool SubtractFromBalance(int fromUserId, decimal transferAmount)
         {
-            User returnUser = null;
+            bool isSuccessful = false;
 
             try
             {
@@ -26,14 +26,15 @@ namespace TenmoServer.DAO
                 {
                     conn.Open();
 
-                    string sql = "SELECT user_id, username FROM users WHERE user_id = @userId;";
+                    string sql = "UPDATE accounts SET balance = (balance - @transferAmount) WHERE user_id = @fromUserId;";
                     SqlCommand cmd = new SqlCommand(sql, conn);
-                    cmd.Parameters.AddWithValue("@userId", userId);
-                    SqlDataReader reader = cmd.ExecuteReader();
+                    cmd.Parameters.AddWithValue("@fromUserId", fromUserId);                    
+                    cmd.Parameters.AddWithValue("@transferAmount", transferAmount);
+                    int rowsAffected = cmd.ExecuteNonQuery();
 
-                    if (reader.Read())
+                    if (rowsAffected > 0)
                     {
-                        returnUser = GetUserFromReader(reader);
+                        isSuccessful = true;
                     }
                 }
             }
@@ -42,18 +43,65 @@ namespace TenmoServer.DAO
                 throw;
             }
 
-            return returnUser;
+            return isSuccessful;
         }
 
-        private User GetUserFromReader(SqlDataReader reader)
+        public bool AddToBalance(int toUserId, decimal transferAmount)
         {
-            User u = new User()
-            {
-                UserId = Convert.ToInt32(reader["user_id"]),
-                Username = Convert.ToString(reader["username"])
-            };
+            bool isSuccessful = false;
 
-            return u;
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    string sql = "UPDATE accounts SET balance = (balance + @transferAmount) WHERE user_id = @toUserId;";
+                    SqlCommand cmd = new SqlCommand(sql, conn);                    
+                    cmd.Parameters.AddWithValue("@toUserId", toUserId);
+                    cmd.Parameters.AddWithValue("@transferAmount", transferAmount);
+                    int rowsAffected = cmd.ExecuteNonQuery();
+
+                    if (rowsAffected > 0)
+                    {
+                        isSuccessful = true;
+                    }
+                }
+            }
+            catch (SqlException)
+            {
+                throw;
+            }
+
+            return isSuccessful;
+        }
+
+        public void CreateTransfer(int fromUserId, int toUserId, decimal transferAmount)
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    string insertSql = "INSERT INTO transfers(transfer_type_id, transfer_status_id, account_from, account_to, amount) VALUES (2, 2, (SELECT account_id FROM accounts WHERE user_id = @fromUserId), (SELECT account_id FROM accounts WHERE user_id = @toUserId), @transferAmount);";
+                    SqlCommand cmd = new SqlCommand(insertSql, conn);
+                    cmd.Parameters.AddWithValue("@fromUserId", fromUserId);
+                    cmd.Parameters.AddWithValue("@toUserId", toUserId);
+                    cmd.Parameters.AddWithValue("@transferAmount", transferAmount);
+                    cmd.ExecuteNonQuery();
+
+                    string selectSql = "SELECT account_from, account_to, amount FROM transfers WHERE transfer_id = @@IDENTITY;";
+                    cmd = new SqlCommand(selectSql, conn);
+
+                }
+            }
+            catch (SqlException)
+            {
+                throw;
+            }
+
+            
         }
     }
 }

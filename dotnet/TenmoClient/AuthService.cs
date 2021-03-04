@@ -13,6 +13,25 @@ namespace TenmoClient
         private readonly static string TRANSFER_URL = API_BASE_URL + "transfer";
         private readonly IRestClient client = new RestClient();
 
+        public bool CreateBalances(int fromUserId, int toUserId, decimal transferAmount)
+        {
+            RestRequest request = new RestRequest($"{TRANSFER_URL}/{fromUserId}/{toUserId}/{transferAmount}");
+            IRestResponse response = client.Get(request);
+
+            if (response.ResponseStatus != ResponseStatus.Completed)
+            {
+                throw new Exception("Error - Unable to reach server", response.ErrorException);
+            }
+            else if (!response.IsSuccessful)
+            {
+                throw new Exception("Error - Received unsuccessful response", response.ErrorException);
+            }
+            else
+            {
+                return response;
+            }
+        }
+
         public User GetUser(int userId)
         {
             RestRequest request = new RestRequest($"{TRANSFER_URL}/{userId}");

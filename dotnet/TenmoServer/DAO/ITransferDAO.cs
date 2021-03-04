@@ -5,8 +5,11 @@ using System.Threading.Tasks;
 
 namespace TenmoServer.DAO
 {
-    interface ITransferDAO
+    public interface ITransferDAO
     {
+        public bool SubtractFromBalance(int fromUserId, decimal transferAmount);
+        public bool AddToBalance(int toUserId, decimal transferAmount)
 
+        public bool CreateTransfer(int fromUserId, int toUserId, decimal transferAmount);
     }
 }

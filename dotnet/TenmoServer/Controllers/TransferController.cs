@@ -13,10 +13,12 @@ namespace TenmoServer.Controllers
     public class TransferController : ControllerBase
     {
         private readonly IUserDAO _userDAO;
+        private readonly ITransferDAO _transferDAO;
 
-        public TransferController(IUserDAO userDAO = null)
+        public TransferController(IUserDAO userDAO = null, ITransferDAO transferDAO = null)
         {
             _userDAO = userDAO;
+            _transferDAO = transferDAO;
         }
         
         [HttpGet]
@@ -33,19 +35,34 @@ namespace TenmoServer.Controllers
                 return NotFound();
             }
         }
-
-        [HttpGet("{username}")]
-        public ActionResult<User> GetUser(string username)
+        
+        [HttpPut]
+        public ActionResult<bool> UpdateAccountBalance(int fromUserId, int toUserId, decimal transferAmount)
         {
-            User user = _userDAO.GetUser(username);
+            bool isUpdated = _transferDAO.UpdateBalances(fromUserId, toUserId, transferAmount);
 
-            if(user != null)
+            if (isUpdated)
             {
-                return Ok(user);
+                return Ok();
             }
             else
             {
-                return NotFound();
+                return BadRequest();
+            }
+        }
+
+        [HttpPost("{fromUserId}/{toUserId}/{transferAmount}")]
+        public ActionResult<bool> CreateTransfer(int fromUserId, int toUserId, decimal transferAmount)
+        {
+            bool isUpdated = _transferDAO.CreateTransfer(fromUserId, toUserId, transferAmount);
+
+            if (isUpdated)
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest();
             }
         }
     }

@@ -93,6 +93,14 @@ namespace TenmoClient
                 }
                 else if (menuSelection == 2)
                 {
+
+                }
+                else if (menuSelection == 3)
+                {
+
+                }
+                else if (menuSelection == 4)
+                {
                     List<User> users = authService.GetAllUsers();
 
                     foreach (User user in users)
@@ -102,19 +110,11 @@ namespace TenmoClient
 
                     Console.WriteLine();
                     Console.Write("Enter ID of user you are sending to (0 to cancel): ");
-                    int userInput = Convert.ToInt32(Console.ReadLine());
-                    Console.WriteLine();
+                    int toUserId = Convert.ToInt32(Console.ReadLine());
+                    int fromUserId = UserService.GetUserId();
+                    Console.Write("Enter amount: ");
+                    decimal transferAmount = Convert.ToDecimal(Console.ReadLine());
 
-                    User transferUser = authService.GetUser(userInput);
-
-                    Console.WriteLine($"You'll be sending money to {transferUser.Username}");
-                }
-                else if (menuSelection == 3)
-                {
-
-                }
-                else if (menuSelection == 4)
-                {
 
                 }
                 else if (menuSelection == 5)
