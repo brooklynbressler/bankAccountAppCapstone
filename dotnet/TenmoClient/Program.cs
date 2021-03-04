@@ -8,6 +8,7 @@ namespace TenmoClient
     {
         private static readonly ConsoleService consoleService = new ConsoleService();
         private static readonly AuthService authService = new AuthService();
+        private static readonly TransferService transferService = new TransferService();
 
         static void Main(string[] args)
         {
@@ -115,7 +116,8 @@ namespace TenmoClient
                     Console.Write("Enter amount: ");
                     decimal transferAmount = Convert.ToDecimal(Console.ReadLine());
 
-
+                    Transfer newTransfer = transferService.MakeTransferFromUserInput(fromUserId, toUserId, transferAmount);
+                    authService.CreateTransfer(newTransfer);
                 }
                 else if (menuSelection == 5)
                 {

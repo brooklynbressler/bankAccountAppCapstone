@@ -13,10 +13,11 @@ namespace TenmoClient
         private readonly static string TRANSFER_URL = API_BASE_URL + "transfer";
         private readonly IRestClient client = new RestClient();
 
-        public bool CreateBalances(int fromUserId, int toUserId, decimal transferAmount)
+        public Transfer CreateTransfer(Transfer transfer)
         {
-            RestRequest request = new RestRequest($"{TRANSFER_URL}/{fromUserId}/{toUserId}/{transferAmount}");
-            IRestResponse response = client.Get(request);
+            RestRequest request = new RestRequest(TRANSFER_URL);
+            request.AddJsonBody(transfer);
+            IRestResponse<Transfer> response = client.Post<Transfer>(request);
 
             if (response.ResponseStatus != ResponseStatus.Completed)
             {
@@ -28,7 +29,7 @@ namespace TenmoClient
             }
             else
             {
-                return response;
+                return response.Data;
             }
         }
 

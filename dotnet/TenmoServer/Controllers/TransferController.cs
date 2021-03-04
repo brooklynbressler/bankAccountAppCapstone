@@ -35,34 +35,22 @@ namespace TenmoServer.Controllers
                 return NotFound();
             }
         }
-        
-        [HttpPut]
-        public ActionResult<bool> UpdateAccountBalance(int fromUserId, int toUserId, decimal transferAmount)
-        {
-            bool isUpdated = _transferDAO.UpdateBalances(fromUserId, toUserId, transferAmount);
+                
 
-            if (isUpdated)
+        [HttpPost]
+        public ActionResult<Transfer> CreateTransfer(Transfer transfer)
+        {
+            bool isSubtracted = _transferDAO.SubtractFromBalance(transfer.AccountFrom, transfer.TransferAmount);
+            bool isAdded = _transferDAO.AddToBalance(transfer.AccountTo, transfer.TransferAmount);
+            Transfer newTransfer = _transferDAO.CreateTransfer(transfer);
+
+            if (isSubtracted && isAdded && newTransfer != null)
             {
-                return Ok();
+                return Ok(newTransfer);
             }
             else
             {
-                return BadRequest();
-            }
-        }
-
-        [HttpPost("{fromUserId}/{toUserId}/{transferAmount}")]
-        public ActionResult<bool> CreateTransfer(int fromUserId, int toUserId, decimal transferAmount)
-        {
-            bool isUpdated = _transferDAO.CreateTransfer(fromUserId, toUserId, transferAmount);
-
-            if (isUpdated)
-            {
-                return Ok();
-            }
-            else
-            {
-                return BadRequest();
+                return BadRequest("nope, sorry");
             }
         }
     }

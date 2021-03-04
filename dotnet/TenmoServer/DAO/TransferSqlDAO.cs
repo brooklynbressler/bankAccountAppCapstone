@@ -76,24 +76,56 @@ namespace TenmoServer.DAO
             return isSuccessful;
         }
 
-        public void CreateTransfer(int fromUserId, int toUserId, decimal transferAmount)
+        public Transfer GetTransfer(int tranferId)
         {
+            Transfer transfer = null;
+
             try
             {
                 using (SqlConnection conn = new SqlConnection(connectionString))
                 {
                     conn.Open();
 
-                    string insertSql = "INSERT INTO transfers(transfer_type_id, transfer_status_id, account_from, account_to, amount) VALUES (2, 2, (SELECT account_id FROM accounts WHERE user_id = @fromUserId), (SELECT account_id FROM accounts WHERE user_id = @toUserId), @transferAmount);";
+                    string sql = "SELECT account_from, account_to, amount FROM transfers WHERE transfer_id = @transferId; ";
+                    SqlCommand cmd = new SqlCommand(sql, conn);
+                    cmd.Parameters.AddWithValue("@transferId", tranferId);
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    if (reader.Read())
+                    {
+                        transfer = GetTransferFromReader(reader);
+                    }
+                }
+            }
+            catch (SqlException)
+            {
+
+                throw;
+            }
+
+            return transfer;
+        }
+
+        public Transfer CreateTransfer(Transfer transfer)
+        {
+            Transfer returnTransfer = null;
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    string insertSql = "INSERT INTO transfers(transfer_type_id, transfer_status_id, account_from, account_to, amount) VALUES (2, 2, (SELECT account_id FROM accounts WHERE user_id = @fromUserId), (SELECT account_id FROM accounts WHERE user_id = @toUserId), @transferAmount); SELECT SCOPE_IDENTITY();";
                     SqlCommand cmd = new SqlCommand(insertSql, conn);
-                    cmd.Parameters.AddWithValue("@fromUserId", fromUserId);
-                    cmd.Parameters.AddWithValue("@toUserId", toUserId);
-                    cmd.Parameters.AddWithValue("@transferAmount", transferAmount);
-                    cmd.ExecuteNonQuery();
+                    cmd.Parameters.AddWithValue("@fromUserId", transfer.AccountFrom);
+                    cmd.Parameters.AddWithValue("@toUserId", transfer.AccountTo);
+                    cmd.Parameters.AddWithValue("@transferAmount", transfer.TransferAmount);
 
-                    string selectSql = "SELECT account_from, account_to, amount FROM transfers WHERE transfer_id = @@IDENTITY;";
-                    cmd = new SqlCommand(selectSql, conn);
+                    int rowId = Convert.ToInt32(cmd.ExecuteScalar());
+                    transfer.TransferId = rowId;
 
+                    returnTransfer = GetTransfer(transfer.TransferId);
                 }
             }
             catch (SqlException)
@@ -101,7 +133,19 @@ namespace TenmoServer.DAO
                 throw;
             }
 
-            
+            return returnTransfer;
+        }
+
+        private Transfer GetTransferFromReader(SqlDataReader reader)
+        {
+            Transfer t = new Transfer()
+            {
+                AccountFrom = Convert.ToInt32(reader["account_from"]),
+                AccountTo = Convert.ToInt32(reader["account_to"]),
+                TransferAmount = Convert.ToDecimal(reader["amount"])
+            };
+
+            return t;
         }
     }
 }
