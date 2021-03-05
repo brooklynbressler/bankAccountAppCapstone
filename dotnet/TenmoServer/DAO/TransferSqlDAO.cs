@@ -86,7 +86,7 @@ namespace TenmoServer.DAO
                 {
                     conn.Open();
 
-                    string sql = "SELECT account_from, account_to, amount FROM transfers WHERE transfer_id = @transferId; ";
+                    string sql = "SELECT transfer_id, account_from, account_to, amount FROM transfers WHERE transfer_id = @transferId; ";
                     SqlCommand cmd = new SqlCommand(sql, conn);
                     cmd.Parameters.AddWithValue("@transferId", tranferId);
                     SqlDataReader reader = cmd.ExecuteReader();
@@ -140,6 +140,7 @@ namespace TenmoServer.DAO
         {
             Transfer t = new Transfer()
             {
+                TransferId = Convert.ToInt32(reader["transfer_id"]),
                 AccountFrom = Convert.ToInt32(reader["account_from"]),
                 AccountTo = Convert.ToInt32(reader["account_to"]),
                 TransferAmount = Convert.ToDecimal(reader["amount"])

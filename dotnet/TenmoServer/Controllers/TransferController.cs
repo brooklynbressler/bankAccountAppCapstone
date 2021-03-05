@@ -22,7 +22,7 @@ namespace TenmoServer.Controllers
         }
         
         [HttpGet]
-        public ActionResult<List<User>> GetAllUsers()
+        public ActionResult<List<User>> GetAllUsersForTransfer()
         {
             List<User> users = _userDAO.GetUsers();
 
@@ -35,14 +35,14 @@ namespace TenmoServer.Controllers
                 return NotFound();
             }
         }
-                
+
 
         [HttpPost]
         public ActionResult<Transfer> CreateTransfer(Transfer transfer)
-        {
+        {            
+            Transfer newTransfer = _transferDAO.CreateTransfer(transfer);
             bool isSubtracted = _transferDAO.SubtractFromBalance(transfer.AccountFrom, transfer.TransferAmount);
             bool isAdded = _transferDAO.AddToBalance(transfer.AccountTo, transfer.TransferAmount);
-            Transfer newTransfer = _transferDAO.CreateTransfer(transfer);
 
             if (isSubtracted && isAdded && newTransfer != null)
             {

@@ -9,6 +9,7 @@ namespace TenmoClient
         private static readonly ConsoleService consoleService = new ConsoleService();
         private static readonly AuthService authService = new AuthService();
         private static readonly TransferService transferService = new TransferService();
+        private static readonly AccountService accountService = new AccountService();
 
         static void Main(string[] args)
         {
@@ -88,7 +89,7 @@ namespace TenmoClient
                 }
                 else if (menuSelection == 1)
                 {
-                    decimal balance = authService.GetAccountBalance();
+                    decimal balance = accountService.GetAccountBalance();
                     Console.WriteLine();
                     Console.WriteLine($"Your current balance is: ${balance}");
                 }
@@ -102,22 +103,34 @@ namespace TenmoClient
                 }
                 else if (menuSelection == 4)
                 {
-                    List<User> users = authService.GetAllUsers();
+                    int fromUserId = UserService.GetUserId();
+                    decimal balance = accountService.GetAccountBalance();
+                    List<User> users = transferService.GetAllUsersForTransfer();
 
                     foreach (User user in users)
                     {
                         Console.WriteLine($"Username is: {user.Username} UserId is: {user.UserId}");
                     }
 
+                    //get the user id the money is being sent to
                     Console.WriteLine();
                     Console.Write("Enter ID of user you are sending to (0 to cancel): ");
                     int toUserId = Convert.ToInt32(Console.ReadLine());
-                    int fromUserId = UserService.GetUserId();
+
+                    //get amount being sent
                     Console.Write("Enter amount: ");
                     decimal transferAmount = Convert.ToDecimal(Console.ReadLine());
 
-                    Transfer newTransfer = transferService.MakeTransferFromUserInput(fromUserId, toUserId, transferAmount);
-                    authService.CreateTransfer(newTransfer);
+                    if (balance >= transferAmount)
+                    {
+                        Transfer newTransfer = transferService.MakeTransferFromUserInput(fromUserId, toUserId, transferAmount);
+                        transferService.CreateTransfer(newTransfer);
+                    }
+                    else
+                    {
+                        Console.WriteLine();
+                        Console.WriteLine($"Insufficient funds. Your current balance is ${balance}");
+                    }                    
                 }
                 else if (menuSelection == 5)
                 {
