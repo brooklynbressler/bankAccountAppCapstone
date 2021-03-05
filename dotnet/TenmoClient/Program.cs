@@ -95,7 +95,24 @@ namespace TenmoClient
                 }
                 else if (menuSelection == 2)
                 {
+                    int userId = UserService.GetUserId();
+                    List<TransferListItem> transferList = transferService.GetListOfAllTransfers(userId);
 
+                    string transferType = "";
+
+                    foreach (TransferListItem transferListItem in transferList)
+                    {
+                        if (transferListItem.TransferType == 1)
+                        {
+                            transferType = "From";
+                        }
+                        else
+                        {
+                            transferType = "To";
+                        }
+
+                        Console.WriteLine($"Transfer ID: {transferListItem.TransferId} {transferType}: {transferListItem.Username} Amount: $ {transferListItem.TransferAmount}");
+                    }
                 }
                 else if (menuSelection == 3)
                 {

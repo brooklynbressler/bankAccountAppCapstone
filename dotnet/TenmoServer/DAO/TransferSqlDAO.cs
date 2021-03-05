@@ -25,7 +25,7 @@ namespace TenmoServer.DAO
                 {
                     conn.Open();
 
-                    string sql = "SELECT t.transfer_id, u.username, t.amount, tt.transfer_type_id " +
+                    string sql = "SELECT t.transfer_id AS TransferId, u.username AS Username, t.amount AS TransferAmount, tt.transfer_type_id AS TransferType " +
                         "FROM accounts a " +
                         "JOIN transfers t ON a.account_id = t.account_to " +
                         "JOIN users u ON a.user_id = u.user_id " +
@@ -187,10 +187,10 @@ namespace TenmoServer.DAO
         {
             TransferListItem tli = new TransferListItem()
             {
-                TransferId = Convert.ToInt32(reader["transfer_id"]),
-                Username = Convert.ToString(reader["username"]),
-                TransferAmount = Convert.ToDecimal(reader["amount"]),
-                TransferType = Convert.ToInt32(reader["transfer_type"])
+                TransferId = Convert.ToInt32(reader["TransferId"]),
+                Username = Convert.ToString(reader["Username"]),
+                TransferAmount = Convert.ToDecimal(reader["TransferAmount"]),
+                TransferType = Convert.ToInt32(reader["TransferType"])
             };
 
             return tli;

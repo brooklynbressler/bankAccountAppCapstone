@@ -13,6 +13,28 @@ namespace TenmoClient
         private readonly static string TRANSFER_URL = API_BASE_URL + "transfer";
         private readonly IRestClient client = new RestClient();
 
+        public List<TransferListItem> GetListOfAllTransfers(int userId)
+        {
+            string token = UserService.GetToken();
+            client.Authenticator = new JwtAuthenticator(token);
+
+            RestRequest request = new RestRequest(TRANSFER_URL + "/{id}");
+            IRestResponse<List<TransferListItem>> response = client.Get<List<TransferListItem>>(request);
+
+            if (response.ResponseStatus != ResponseStatus.Completed)
+            {
+                throw new Exception("Error - Unable to reach server", response.ErrorException);
+            }
+            else if (!response.IsSuccessful)
+            {
+                throw new Exception("Error - Received unsuccessful response", response.ErrorException);
+            }
+            else
+            {
+                return response.Data;
+            }
+        }
+
         public Transfer MakeTransferFromUserInput(int accountFromId, int accountToId, decimal transferAmount)
         {
             string token = UserService.GetToken();
