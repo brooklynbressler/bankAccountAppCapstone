@@ -16,6 +16,40 @@ namespace TenmoServer.DAO
             connectionString = dbConnectionString;
         }
 
+        public List<TransferListItem> GetTransfers(int userId)
+        {
+            List<TransferListItem> transferList = new List<TransferListItem>();
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    string sql = "SELECT t.transfer_id, u.username, t.amount, tt.transfer_type_id " +
+                        "FROM accounts a " +
+                        "JOIN transfers t ON a.account_id = t.account_to " +
+                        "JOIN users u ON a.user_id = u.user_id " +
+                        "JOIN transfer_types tt ON t.transfer_type_id = tt.transfer_type_id;";
+                    SqlCommand cmd = new SqlCommand(sql, conn);
+                    cmd.Parameters.AddWithValue("@userId", userId);
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        TransferListItem tli = GetTransferListItemFromReader(reader);
+                        transferList.Add(tli);
+                    }
+
+                }
+            }
+            catch (SqlException)
+            {
+                throw;
+            }
+
+            return transferList;
+        }
+
         public bool SubtractFromBalance(int fromUserId, decimal transferAmount)
         {
             bool isSuccessful = false;
@@ -147,6 +181,19 @@ namespace TenmoServer.DAO
             };
 
             return t;
+        }
+    
+        private TransferListItem GetTransferListItemFromReader(SqlDataReader reader)
+        {
+            TransferListItem tli = new TransferListItem()
+            {
+                TransferId = Convert.ToInt32(reader["transfer_id"]),
+                Username = Convert.ToString(reader["username"]),
+                TransferAmount = Convert.ToDecimal(reader["amount"]),
+                TransferType = Convert.ToInt32(reader["transfer_type"])
+            };
+
+            return tli;
         }
     }
 }

@@ -36,6 +36,21 @@ namespace TenmoServer.Controllers
             }
         }
 
+        [HttpGet("{id}")]
+        public ActionResult<List<TransferListItem>> GetTransfers(int userId)
+        {
+            List<TransferListItem> alltransfers = _transferDAO.GetTransfers(userId);
+
+            if (alltransfers != null)
+            {
+                return Ok(alltransfers);
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+
 
         [HttpPost]
         public ActionResult<Transfer> CreateTransfer(Transfer transfer)
