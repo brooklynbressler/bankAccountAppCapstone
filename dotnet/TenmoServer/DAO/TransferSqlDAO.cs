@@ -16,6 +16,44 @@ namespace TenmoServer.DAO
             connectionString = dbConnectionString;
         }
 
+        public TransferReceipt GetTransferReceipt(int transferId)
+        {
+            TransferReceipt transferReceipt = new TransferReceipt();
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    string sql = "SELECT t.transfer_id AS TransferId, t.account_from AS AccountFrom, t.account_to AS AccountTo, t.transfer_type_id AS TransferType, ts.transfer_status_desc AS Status, t.amount AS Amount " +
+                        "FROM transfers t " +
+                        "JOIN accounts a ON a.account_id = t.account_from " +
+                        "JOIN transfer_types tt ON tt.transfer_type_id = t.transfer_type_id " +
+                        "JOIN users u ON u.user_id = a.user_id " +
+                        "JOIN transfer_statuses ts ON ts.transfer_status_id = t.transfer_status_id " +
+                        "WHERE t.transfer_id = @transferId;";
+
+                    SqlCommand cmd = new SqlCommand(sql, conn);
+
+                    cmd.Parameters.AddWithValue("@transferId", transferId);
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    if (reader.Read())
+                    {
+                        transferReceipt = GetTransferReceiptFromReader(reader);
+                    }
+                }
+            }
+            catch(SqlException)
+            {
+                throw;
+            }
+
+            return transferReceipt;
+        }
+
         public List<TransferListItem> GetTransfers(int userId)
         {
             List<TransferListItem> transferList = new List<TransferListItem>();
@@ -33,6 +71,7 @@ namespace TenmoServer.DAO
                     SqlCommand cmd = new SqlCommand(sql, conn);
                     cmd.Parameters.AddWithValue("@userId", userId);
                     SqlDataReader reader = cmd.ExecuteReader();
+
 
                     while (reader.Read())
                     {
@@ -194,6 +233,21 @@ namespace TenmoServer.DAO
             };
 
             return tli;
+        }
+
+        private TransferReceipt GetTransferReceiptFromReader(SqlDataReader reader)
+        {
+            TransferReceipt tr = new TransferReceipt()
+            {
+                TransferId = Convert.ToInt32(reader["transfer_id"]),
+                FromUserId = Convert.ToInt32(reader["account_from"]),
+                ToUserId = Convert.ToInt32(reader["account_to"]),
+                TransferType = Convert.ToInt32(reader["transfer_type_id"]),
+                TransferStatus = Convert.ToString(reader["transfer_status_id"]),
+                Amount = Convert.ToDecimal(reader["amount"])
+            };
+
+            return tr;
         }
     }
 }

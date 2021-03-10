@@ -21,6 +21,21 @@ namespace TenmoServer.Controllers
             _transferDAO = transferDAO;
         }
         
+        [HttpGet("info/{transferId}")]
+        public ActionResult<TransferReceipt> GetTransferReceiptDetails(int transferId)
+        {
+            TransferReceipt transferReceipt = _transferDAO.GetTransferReceipt(transferId);
+
+            if(transferReceipt != null)
+            {
+                return Ok(transferReceipt);
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+
         [HttpGet]
         public ActionResult<List<User>> GetAllUsersForTransfer()
         {

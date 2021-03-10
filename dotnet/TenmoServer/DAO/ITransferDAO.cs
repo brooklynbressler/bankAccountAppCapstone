@@ -12,5 +12,7 @@ namespace TenmoServer.DAO
         public bool AddToBalance(int toUserId, decimal transferAmount);
         public Transfer CreateTransfer(Transfer transfer);
         public List<TransferListItem> GetTransfers(int userId);
+
+        public TransferReceipt GetTransferReceipt(int transferId);
     }
 }
